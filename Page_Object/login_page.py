@@ -18,7 +18,7 @@ class LoginPage:
     email_next_button = By.XPATH, "//span[text()='Next']"
     password_input = By.XPATH, "//input[@type='password']"
     password_next_button = By.XPATH, "//span[text()='Next']"
-    # Assertions Selectors
+    # Selectors for Assertions
     login_title = By.XPATH, "/html/body/div/div/div[1]/span"
     google_button_text = By.XPATH, "/html/body/div/div/button/div/span"
     access_text_of_survey_app = By.XPATH, "/html/body/div/div/div[2]/span[2]"

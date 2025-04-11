@@ -48,7 +48,6 @@ class LoginTest:
         time.sleep(3)
 
     def switch_language_if_needed(self, target_language, expected_texts):
-        # Switch the language if it's different from the target.
         current_language = self.page.get_selected_language().strip().split("(")[0].strip()
 
         if current_language.lower() != target_language.lower():
@@ -63,7 +62,6 @@ class LoginTest:
         assert self.page.is_access_with_google_text_correct(expected_texts["googleButton"]), "Google button text mismatch"
         assert self.page.is_access_with_survey_app_text(
             expected_texts["accessWithGoogle"]), "Access with survey management text mismatch"
-
         assert self.page.is_sign_in_button_text_correct(expected_texts["signInButton"]), "Sign in text mismatch"
         print("All assertions passed successfully.")
 
@@ -86,4 +84,4 @@ class LoginTest:
         self.page.click_password_next_button()
         time.sleep(3)
         self.driver.switch_to.window(original_window)
-        time.sleep(5)
+        time.sleep(3)
