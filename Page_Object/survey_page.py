@@ -1,14 +1,29 @@
+import logging
 import random
+import string
 import time
-from selenium.common import TimeoutException
+import datetime
+from re import search
+import fake
+from faker import Faker
+from bs4 import BeautifulSoup
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common import TimeoutException, NoSuchElementException
+from selenium.webdriver.chrome import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.core import driver
+from Config.config import Config
+from test_Data.translations import Translations
+
 
 class SurveyPage:
     def __init__(self, driver):
+        # self.faker = None
+        self.faker = Faker()
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
 
@@ -75,13 +90,69 @@ class SurveyPage:
     save_setting_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[3]/button[2]"
     cancel_setting_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[3]/button[2]"
     language_options = By.XPATH, "/html/body/div[4]/div[3]"
+    change_language_dropdown = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[2]/div[2]/div/div/div"
     organization_list = By.XPATH, "/html/body/div[4]/div[3]"
     edit_icon = By.XPATH, "//tbody/tr[1]/td[6]/div[1]/a[1]/button[1]"
 
     # Selectors for edit setting
     survey_setting_tab = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[4]/div/div/div[2]/div[1]/div"
     activity_toggle = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[1]/label/span[1]"
+    search_input_field = By.XPATH, "/html/body/div[4]/div[3]/div[1]/div/div/input"
+    filled_checkbox = By.CSS_SELECTOR, "[data-testid='CheckBoxIcon']"
+    blank_checkbox = By.CSS_SELECTOR, "[data-testid='CheckBoxOutlineBlankIcon']"
 
+    # Selectors for Questions
+    question_tab = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[2]/div/button[2]"
+    create_question_btn = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[2]/div/button[2]"
+    create_inside_ques_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
+    question_type = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/div"
+    question_type_dropdown = By.XPATH, "/html/body/div[4]/div[3]/ul"
+    abbreviation_question_field = By.XPATH,"/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/div/input"
+    question_description = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/div/div"
+    save_question = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div[2]/button[2]"
+    save_dilog_btn = By.XPATH, "/html/body/div[4]/div[3]/div/div[2]/button[2]"
+    save_edit_dilog_btn = By.CSS_SELECTOR, ".MuiButtonBase-root.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.confirmation-modal_confirm-button__lZBTH.css-ger89v"
+
+    # Selectors for edit question
+    edit_question_icon = By.XPATH, "//tbody/tr[1]/td[8]/div[1]/button[1]"
+
+    # Selectors for delete question
+    remove_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[1]/td[8]/div/button[2]"
+    inside_remove_icon = By.XPATH, "(//button[normalize-space()='Remove'] | //button[normalize-space()='Eliminar'] | //button[normalize-space()='Remover'])[1]"
+
+    # Selectors for Add Questions
+    add_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[2]/div/button[1]"
+    no_questions_found = By.XPATH, "//p[contains(@class, 'MuiTypography-noWrap') and (normalize-space(text())='No questions found' or normalize-space(text())='No se ha encontrado ninguna pregunta' or normalize-space(text())='Nenhuma pergunta encontrada')]"
+    cancel_add_question_page = By.XPATH, "//button[(normalize-space(text())='Cancel' or normalize-space(text())='Cancelar') and contains(@class, 'MuiButton-root')]"
+    select_all_checkbox = By.XPATH, "//input[@aria-label='Select all' or @aria-label='Seleccionar todo' or @aria-label='Selecionar tudo']"
+    add_question_btn = By.XPATH, "//button[normalize-space(text())='Add' or normalize-space(text())='Agregar' or normalize-space(text())='Adicionar']"
+
+    # Selectors for Search question
+    search_field = By.XPATH, "//*[@id='simple-tabpanel-1']/div/div/div[1]/div/div[1]/div/div[1]/input"
+    question_name = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[1]/td[2]"
+    search_cross_icon   = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[1]/div[2]/button"
+    type_dropdown = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/div[1]"
+    clear_filter = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/button"
+    table_body = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div"
+    abbreviation_dropdown = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/div[2]/span"
+    input = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/div[2]/span/p"
+    show_remove = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[2]/label/span[2]"
+    full_table = By.XPATH, "/table/tbody/div"
+
+    # Selectors of restore question
+    restore_button = By.XPATH, "//tbody/tr[2]/td[8]/div[1]/button[1]//*[name()='svg']"
+    restore_popup_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
+    source  = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[2]/td[1]"
+    target  = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[1]/td[1]"
+
+
+    def select_random_abbreviation(self):
+        self.driver.find_element(*self.abbreviation_dropdown).click()
+
+    def generate_random_description(self, sentences=2):
+        return self.faker.paragraph(nb_sentences=sentences)
+
+    # method for create survey
     def click_on_create_button(self):
         self.driver.find_element(*self.create_button).click()
 
@@ -265,6 +336,7 @@ class SurveyPage:
         self.driver.find_element(*self.accept_version_button).click()
 
 
+
     # Method of edit basic information of survey
     def click_on_survey_name_field(self):
         name_field = WebDriverWait(self.driver, 10).until(
@@ -290,6 +362,7 @@ class SurveyPage:
 
     def click_on_save_survey_dilog_box(self):
         self.driver.find_element(*self.save_survey_dialog_box).click()
+
 
 
     # Method for Open version and edit information
@@ -326,6 +399,205 @@ class SurveyPage:
     def fill_user_details(self, survey_name, abbre_name):
         self.wait.until(EC.visibility_of_element_located(self.survey_name_input_field)).send_keys(survey_name)
         self.wait.until(EC.visibility_of_element_located(self.abbreviation_input_field)).send_keys(abbre_name)
+
+
+    # Method for create question
+    def click_on_question_tab(self):
+        self.driver.find_element(*self.question_tab).click()
+
+    def click_on_create_question_button(self):
+        self.driver.find_element(*self.create_question_btn).click()
+
+    def click_on_question_inside_create_btn(self):
+        self.driver.find_element(*self.create_inside_ques_btn).click()
+
+    def click_on_question_type(self):
+        self.driver.find_element(*self.question_type).click()
+        options = self.driver.find_elements(*self.question_type_dropdown)
+        if options:
+            random_option = random.choice(options)
+            random_option.click()
+        else:
+            print("No options available in the dropdown.")
+            time.sleep(3)
+
+    def click_on_abbreviation_question_field(self):
+        abbreviation_input = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable(self.abbreviation_question_field)
+        )
+        abbreviation = "Abbr" + self.generate_random_string(4)
+        abbreviation_input.send_keys(abbreviation)
+        print(f"Survey abbreviation created with name: {abbreviation}")
+
+    def enter_question_description(self):
+        random_description = self.generate_random_description()
+        # Target the actual <textarea> inside the div
+        question_desc_field = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "textarea.MuiInputBase-inputMultiline"))
+        )
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", question_desc_field)
+        time.sleep(0.5)
+        question_desc_field.send_keys(random_description)
+        print(f"Entered Description: {random_description}")
+
+    def click_on_save_question(self):
+        self.driver.find_element(*self.save_question).click()
+        time.sleep(1)
+        self.driver.find_element(*self.save_dilog_btn).click()
+        time.sleep(1)
+
+
+    # Method for edit question
+    def click_on_edit_question_icon(self):
+        self.driver.find_element(*self.edit_question_icon).click()
+
+    def edit_question_field(self):
+        random_description = self.generate_random_description()
+        question_desc_field = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "textarea.MuiInputBase-inputMultiline"))
+        )
+        question_desc_field.send_keys(Keys.CONTROL, "a")  # Select all text
+        question_desc_field.send_keys(Keys.DELETE)
+        time.sleep(1)
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", question_desc_field)
+        time.sleep(0.5)
+        # question_desc_field.clear()
+        question_desc_field.send_keys(random_description)
+
+
+    def click_on_save_edit_question(self):
+        self.driver.find_element(*self.save_question).click()
+        time.sleep(2)
+        self.driver.find_element(*self.save_edit_dilog_btn).click()
+        time.sleep(1)
+
+
+    # Method of Remove questions
+    def click_on_remove_icon(self):
+        self.driver.find_element(*self.remove_icon).click()
+        self.driver.find_element(*self.inside_remove_icon).click()
+
+
+    # Method of show remove question
+    def handle_show_removed_functionality(self):
+        self.driver.find_element(*self.show_remove).click()
+        time.sleep(2)
+        self.driver.find_element(*self.restore_button).click()
+        time.sleep(1)
+        self.driver.find_element(*self.restore_popup_button).click()
+        time.sleep(2)
+
+        # locate your elements
+        source_row = self.driver.find_element(*self.source)
+        target_row = self.driver.find_element(*self.target)
+
+        # Perform drag and drop
+        actions = ActionChains(self.driver)
+        actions.click_and_hold(source_row).pause(1)
+        actions.click_and_hold(source_row).move_to_element(target_row).release().perform()
+        time.sleep(2)
+
+        #common save button
+        self.driver.find_element(*self.save_question).click()
+        time.sleep(2)
+        # save questions
+        self.driver.find_element(*self.save_edit_dilog_btn).click()
+        time.sleep(1)
+
+
+    # Method for Add questions
+    def handle_add_question_flow(self):
+        self.driver.find_element(*self.add_icon).click()
+        time.sleep(2)
+
+        try:
+            no_question_found_msg = self.driver.find_element(*self.no_questions_found)
+            raw_text = no_question_found_msg.text
+            message_text = raw_text.strip()
+            print(f"Detected message: '{message_text}'")
+
+            expected_messages = [
+                "No questions found",
+                "No se ha encontrado ninguna pregunta",
+                "Nenhuma pergunta encontrada"
+            ]
+
+            if any(msg in message_text for msg in expected_messages):
+            # if message_text in expected_messages:
+                print("No questions found.")
+                cancel_btn = self.driver.find_element(*self.cancel_add_question_page)
+                cancel_btn.click()
+                print("Clicked on cancel button.")
+                return
+
+        except:
+            print("No 'no questions found' message, assuming questions are available.")
+
+        # Step 3: Questions are available — select all and add
+        self.driver.find_element(*self.select_all_checkbox).click()
+        time.sleep(2)
+        add_btn = self.driver.find_element(*self.add_question_btn)
+        add_btn.click()
+
+        self.driver.find_element(*self.save_question).click()
+        time.sleep(2)
+        self.driver.find_element(*self.save_edit_dilog_btn).click()
+        time.sleep(1)
+
+
+    # Method for search type option functionality
+    def select_random_type_option(self):
+            # Open the dropdown
+            self.driver.find_element(*self.type_dropdown).click()
+            # Wait for the dropdown menu to be visible
+            WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "ul[role='listbox']"))
+            )
+            # Get all the <li> options in the dropdown
+            options = self.driver.find_elements(By.CSS_SELECTOR, "ul[role='listbox'] li[role='option']")
+            if not options:
+                raise Exception("No options found in the type dropdown.")
+            # Pick a random option
+            random_option = random.choice(options)
+            selected_value = random_option.get_attribute("data-value")
+            selected_text = random_option.text
+            # Click the selected option
+            random_option.click()
+
+            self.driver.find_element(*self.clear_filter).click()
+            print("filter clear successfully")
+
+            print(f"Selected option: {selected_text} ")
+            return selected_value
+
+
+    # Method for search functionality
+    def search_question_name_from_first_row(self):
+            """Clicks search field, gets question name from first row, and performs search."""
+            # Click the search field
+            search_field_element = self.driver.find_element(*self.search_field)
+            search_field_element.click()
+
+            # Extract question name from first row
+            question_name_element = self.driver.find_element(
+                By.XPATH,
+                "//table/tbody/tr[1]/td[2]/div"
+            )
+            question_name = question_name_element.text.strip()
+            if not question_name:
+                raise ValueError("No question name found in the first row.")
+
+            # Enter question name into the search field
+            search_field_element.send_keys(question_name)
+            time.sleep(2)  # replace with explicit wait if needed
+
+            return question_name
+
+    def clear_search(self):
+            """Clicks the cross icon to clear the search field."""
+            cross_icon_element = self.driver.find_element(*self.search_cross_icon)
+            cross_icon_element.click()
+            time.sleep(1)
 
 
     # Method for create settings
@@ -381,7 +653,8 @@ class SurveyPage:
         self.driver.find_element(*self.save_setting_btn).click()
 
 
-    # Edit setting
+
+    # Method for edit setting
     def click_on_Survey_setting_tab(self):
         self.driver.find_element(*self.survey_setting_tab).click()
 
@@ -391,5 +664,77 @@ class SurveyPage:
         )
         program_drop.click()
 
+
+    # Method for search program
+    def edit_programs_dropdown(self, cls=None):
+            self.driver.find_element(*self.programs_dropdown).click()
+
+            search = WebDriverWait(self.driver, 5).until(
+                EC.element_to_be_clickable(self.search_input_field)
+            )
+            search.click()
+            time.sleep(0.5)
+
+            # ← correct call here
+            term = Translations.current_search_term()
+            print(f"[DEBUG] Using search term: {term!r}")
+            search.send_keys(term, Keys.ENTER)
+            time.sleep(1)
+
+            try:
+                checkbox_filled = WebDriverWait(self.driver, 5).until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='CheckBoxIcon']"))
+                )
+                if checkbox_filled.is_selected():
+                    print(f"✅ Program 'Graphic Design' checkbox is filled (selected).")
+            except NoSuchElementException:
+                # If the filled checkbox is not found, check for the empty one
+                try:
+                    checkbox_empty = WebDriverWait(self.driver, 5).until(
+                        EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-testid='CheckBoxOutlineBlankIcon']"))
+                    )
+                    if checkbox_empty.is_selected():
+                        print(f"⬜ Program 'Graphic Design' checkbox is empty (unselected).")
+                except NoSuchElementException:
+                    print("⬜ Both checkboxes not found!")
+
+            # Click outside to close dropdown
+            parent_element = self.driver.find_element(By.XPATH,"/html/body/div[3]/div[3]/div/div/div[2]/div[1]/div/div/div/div")
+            ActionChains(self.driver).move_to_element_with_offset(parent_element, -10, -10).click().perform()
+
+
+    def edit_change_language(self):
+            self.driver.find_element(*self.change_language_dropdown).click()
+            options = self.driver.find_elements(*self.language_options)
+            if options:
+                random_option = random.choice(options)
+                random_option.click()
+            else:
+                print("No options available in the dropdown.")
+            time.sleep(3)
+
+            # Click save button
+            self.driver.find_element(*self.save_setting_btn).click()
+            time.sleep(1)
+
     def click_on_activity_toggle(self):
         self.driver.find_element(*self.activity_toggle).click()
+
+    def assertTrue(self, is_selected, param):
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

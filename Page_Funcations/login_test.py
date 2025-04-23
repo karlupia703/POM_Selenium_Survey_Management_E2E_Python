@@ -3,6 +3,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from Page_Funcations.driver_manager import DriverManager
 from Page_Object.login_page import LoginPage
 from Config.config import Config
+from test_Data.translations import Translations
 
 class LoginTest:
     def __init__(self):
@@ -15,30 +16,9 @@ class LoginTest:
         time.sleep(3)
         self.page = LoginPage(self.driver)
         time.sleep(3)
-        self.translations = {
-            "en_US": {
-                "title": "Survey Management",
-                "googleButton": "Sign In with Google",
-                "accessWithGoogle": "Access to Survey Management App",
-                "signInButton": "Sign In"
-            },
-            "Español": {
-                "title": "Gestión de Encuestas",
-                "googleButton": "Iniciar sesión con Google",
-                "accessWithGoogle": "Acceso a la aplicación de gestión de encuestas",
-                "signInButton": "Iniciar sesión"
-            },
-            "pt_BR": {
-                "title": "Gestão de Pesquisas",
-                "googleButton": "Entrar com o Google",
-                "accessWithGoogle": "Acesso ao aplicativo de gerenciamento de pesquisas",
-                "signInButton": "Entrar"
-            }
-        }
 
     def test_login_user(self):
-        expected_texts = self.translations.get(Config.language,{})
-        # expected_texts = (Config.language,{})   "if without run assertions"
+        expected_texts = Translations.get_translation(Config.language)
         if not expected_texts:
             raise ValueError(f"Language '{Config.language}' not found in translations")
         self.switch_language_if_needed(Config.language, expected_texts)

@@ -1,16 +1,22 @@
 import string
 import time
 import random
-from telnetlib import EC
+from lib2to3.pgen2 import driver
+
+# from telnetlib import EC
+
+import fake
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from Page_Funcations.driver_manager import DriverManager
 from Page_Object.survey_page import SurveyPage
 from Config.config import Config
 from faker import Faker
+import unittest
+
 
 class SurveyTest:
     def __init__(self):
@@ -18,6 +24,7 @@ class SurveyTest:
         self.driver = DriverManager.get_driver()
         self.survey_page = SurveyPage(self.driver)
         self.setting_page = SurveyPage(self.driver)
+        self.question_page = SurveyPage(self.driver)
 
     def generate_alphanumeric_string(self, length=4):
         """Generate a random alphanumeric string (letters + digits)."""
@@ -80,7 +87,7 @@ class SurveyTest:
 
             except TimeoutException:
                 print("Toaster not found for version — proceeding with template creation.")
-                print("Survey was successfully created with an empty template.")
+
 
 
     def create_survey_copy_from_another_version(self):
@@ -107,7 +114,6 @@ class SurveyTest:
         time.sleep(2)
         self.survey_page.click_on_version_accept_button()
         time.sleep(2)
-        print("Survey was successfully created with copy from another version")
 
     def edit_survey_basic_information(self):
         """Execute the test of edit basic information"""
@@ -121,7 +127,7 @@ class SurveyTest:
         time.sleep(5)
         self.survey_page.click_on_save_survey_dilog_box()
         time.sleep(5)
-        print("survey information was updated successfully")
+
 
     def open_version_and_edit_content(self):
         """Execute the test of open version and edit the basic information"""
@@ -135,7 +141,107 @@ class SurveyTest:
         time.sleep(3)
         self.survey_page.click_on_version_save_dialog_box()
         time.sleep(3)
-        print("version information was updated successfully")
+
+
+    # create question
+    def create_question(self):
+        self.question_page.click_on_question_tab()
+        time.sleep(2)
+        self.question_page.click_on_create_question_button()
+        time.sleep(2)
+        self.question_page.click_on_question_inside_create_btn()
+        time.sleep(2)
+        self.question_page.click_on_question_type()
+        time.sleep(2)
+        self.question_page.click_on_abbreviation_question_field()
+        time.sleep(1)
+        self.question_page.enter_question_description()
+        time.sleep(3)
+        self.question_page.click_on_question_inside_create_btn()
+        time.sleep(2)
+        self.question_page.click_on_save_question()
+        time.sleep(2)
+
+    def create_multiple_questions(self, count=2):
+        for i in range(count):
+            self.create_question()
+            print(f"Question {i + 1} created and saved successfully.")
+
+
+    def edit_question(self):
+        self.question_page.click_on_edit_question_icon()
+        time.sleep(2)
+        self.question_page.edit_question_field()
+        time.sleep(2)
+        self.question_page.click_on_question_inside_create_btn()
+        time.sleep(3)
+        self.question_page.click_on_save_edit_question()
+        time.sleep(2)
+        print("Question updated successfully.")
+
+    def remove_question(self):
+        self.question_page.click_on_remove_icon()
+        time.sleep(2)
+        self.question_page.click_on_save_edit_question()
+        time.sleep(2)
+        print("The question has been removed.")
+
+
+    def handle_show_removed_questions(self):
+        self.question_page.handle_show_removed_functionality()
+        time.sleep(3)
+
+
+    def add_questions(self):
+        self.question_page.handle_add_question_flow()
+        time.sleep(2)
+        print("Question added successfully")
+
+
+    def test_search_question_name(self):
+        self.question_page.search_question_name_from_first_row()
+        try:
+            question_name = self.question_page.search_question_name_from_first_row()
+            print(f"Searched for question name: {question_name}")
+            self.question_page.clear_search()
+        except NoSuchElementException as e:
+            print(f"Error during search: {e}")
+
+        self.question_page.select_random_type_option()
+        time.sleep(2)
+
+
+    def create_settings(self):
+        self.setting_page.click_on_setting_page()
+        time.sleep(2)
+        self.setting_page.click_on_setting_create_btn()
+        time.sleep(2)
+        self.setting_page.click_on_programs_dropdown_field()
+        time.sleep(3)
+        self.setting_page.click_on_language_dropdown()
+        time.sleep(3)
+        self.setting_page.click_on_organization_dropdown()
+        time.sleep(2)
+        self.setting_page.click_on_setting_save_btn()
+        time.sleep(2)
+        print("Setting created successfully")
+
+
+    def edit_setting(self):
+        self.setting_page.click_on_Survey_setting_tab()
+        time.sleep(3)
+        self.setting_page.edit_programs_dropdown()
+        time.sleep(3)
+        self.setting_page.edit_change_language()
+        time.sleep(5)
+        print("Configuration saved successfully")
+
+        # Change the status of activity
+        self.setting_page.click_on_Survey_setting_tab()
+        time.sleep(3)
+        self.setting_page.click_on_activity_toggle()
+        time.sleep(3)
+        print("Status change successfully")
 
 
     def already_exist_survey(self):
@@ -185,26 +291,4 @@ class SurveyTest:
         time.sleep(3)
 
 
-    def create_settings(self):
-        self.setting_page.click_on_setting_page()
-        time.sleep(2)
-        self.setting_page.click_on_setting_create_btn()
-        time.sleep(2)
-        self.setting_page.click_on_programs_dropdown_field()
-        time.sleep(3)
-        self.setting_page.click_on_language_dropdown()
-        time.sleep(3)
-        self.setting_page.click_on_organization_dropdown()
-        time.sleep(2)
-        self.setting_page.click_on_setting_save_btn()
-        time.sleep(2)
-        print("Setting created successfully")
-
-
-    def edit_setting(self):
-        self.setting_page.click_on_Survey_setting_tab()
-        time.sleep(3)
-        self.setting_page.click_on_activity_toggle()
-        time.sleep(1)
-        print("Configuration enabled")
 
