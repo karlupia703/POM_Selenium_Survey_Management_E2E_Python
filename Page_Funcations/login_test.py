@@ -43,7 +43,6 @@ class LoginTest:
         assert self.page.is_access_with_survey_app_text(
             expected_texts["accessWithGoogle"]), "Access with survey management text mismatch"
         assert self.page.is_sign_in_button_text_correct(expected_texts["signInButton"]), "Sign in text mismatch"
-        print("All assertions passed successfully.")
 
     def handle_google_login(self):
         original_window = self.driver.current_window_handle

@@ -2,9 +2,6 @@ import string
 import time
 import random
 from lib2to3.pgen2 import driver
-
-# from telnetlib import EC
-
 import fake
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
@@ -16,7 +13,6 @@ from Page_Object.survey_page import SurveyPage
 from Config.config import Config
 from faker import Faker
 import unittest
-
 
 class SurveyTest:
     def __init__(self):
@@ -88,8 +84,6 @@ class SurveyTest:
             except TimeoutException:
                 print("Toaster not found for version — proceeding with template creation.")
 
-
-
     def create_survey_copy_from_another_version(self):
         """Execute the test for creating a survey with copy from another version."""
         self.survey_page.click_on_new_version()
@@ -115,20 +109,6 @@ class SurveyTest:
         self.survey_page.click_on_version_accept_button()
         time.sleep(2)
 
-    def edit_survey_basic_information(self):
-        """Execute the test of edit basic information"""
-        self.survey_page.click_on_survey_name_field()
-        time.sleep(5)
-        self.survey_page.change_language()
-        time.sleep(3)
-        self.survey_page.select_of_survey_language()
-        time.sleep(3)
-        self.survey_page.click_on_save_button()
-        time.sleep(5)
-        self.survey_page.click_on_save_survey_dilog_box()
-        time.sleep(5)
-
-
     def open_version_and_edit_content(self):
         """Execute the test of open version and edit the basic information"""
         self.survey_page.click_on_version_name_link()
@@ -142,8 +122,6 @@ class SurveyTest:
         self.survey_page.click_on_version_save_dialog_box()
         time.sleep(3)
 
-
-    # create question
     def create_question(self):
         self.question_page.click_on_question_tab()
         time.sleep(2)
@@ -186,17 +164,14 @@ class SurveyTest:
         time.sleep(2)
         print("The question has been removed.")
 
-
     def handle_show_removed_questions(self):
         self.question_page.handle_show_removed_functionality()
         time.sleep(3)
-
 
     def add_questions(self):
         self.question_page.handle_add_question_flow()
         time.sleep(2)
         print("Question added successfully")
-
 
     def test_search_question_name(self):
         self.question_page.search_question_name_from_first_row()
@@ -210,6 +185,8 @@ class SurveyTest:
         self.question_page.select_random_type_option()
         time.sleep(2)
 
+    def handle_preview_case(self):
+        self.question_page.click_on_preview_and_cross_button()
 
     def create_settings(self):
         self.setting_page.click_on_setting_page()
@@ -226,7 +203,6 @@ class SurveyTest:
         time.sleep(2)
         print("Setting created successfully")
 
-
     def edit_setting(self):
         self.setting_page.click_on_Survey_setting_tab()
         time.sleep(3)
@@ -242,7 +218,6 @@ class SurveyTest:
         self.setting_page.click_on_activity_toggle()
         time.sleep(3)
         print("Status change successfully")
-
 
     def already_exist_survey(self):
         survey_page = SurveyPage(self.driver)
@@ -286,7 +261,6 @@ class SurveyTest:
                 print("Survey creation validation failed: duplicate name allowed.")
         except:
             print("Validation message for duplicate survey not found!")
-
         survey_page.click_on_survey_cancel_button()
         time.sleep(3)
 

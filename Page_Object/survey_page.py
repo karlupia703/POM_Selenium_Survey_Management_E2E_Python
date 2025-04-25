@@ -1,5 +1,6 @@
 import logging
 import random
+import re
 import string
 import time
 import datetime
@@ -18,6 +19,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.core import driver
 from Config.config import Config
 from test_Data.translations import Translations
+
+
+def normalize_version_text(text):
+    # Remove spaces, hyphens, parentheses, and make lowercase
+    return re.sub(r'[\s\-\(\)]', '', text).lower()
+
+def is_version_match(version_text, preview_text):
+    return normalize_version_text(version_text) == normalize_version_text(preview_text)
 
 
 class SurveyPage:
@@ -66,13 +75,6 @@ class SurveyPage:
     all_option = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/fieldset/div/label[3]/span[1]/input"
     mandatory_status = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[4]/label/span[1]/span[1]"
     accept_version_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[3]"
-
-    # Edit basic information
-    name_input = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[3]/div/div/input"
-    language_field = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[6]/div/div/div"
-    select_language_edit = By.XPATH, "/html/body/div[3]/div[3]/ul/li[6]"
-    survey_save_button = By.XPATH, "//html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div/div[1]/div/div/button"
-    save_survey_dialog_box = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
 
     # Open version and edit information
     version_name_link = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr/td[2]/a"
@@ -138,6 +140,12 @@ class SurveyPage:
     input = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/div[2]/span/p"
     show_remove = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[2]/label/span[2]"
     full_table = By.XPATH, "/table/tbody/div"
+
+    # Selectors of preview question
+    preview_button = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div[2]/button[1]"
+    preview_cross_button = By.XPATH, "//button[@aria-label='close']"
+    preview_no_question_msg = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/div/div/div/span[1]"
+    dashboard_edit_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr[1]/td[6]/div/a/button"
 
     # Selectors of restore question
     restore_button = By.XPATH, "//tbody/tr[2]/td[8]/div[1]/button[1]//*[name()='svg']"
@@ -221,7 +229,6 @@ class SurveyPage:
                 EC.element_to_be_clickable(self.version_cancel_button)
             )
             cancel_btn.click()
-            print("cancel button clicked")
         except TimeoutException:
             print("Cancel button not found or not clickable.")
 
@@ -336,35 +343,6 @@ class SurveyPage:
         self.driver.find_element(*self.accept_version_button).click()
 
 
-
-    # Method of edit basic information of survey
-    def click_on_survey_name_field(self):
-        name_field = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.name_input)
-        )
-        name_field.click()
-        # Clear the field properly
-        name_field.send_keys(Keys.CONTROL, "a")  # Select all text
-        name_field.send_keys(Keys.DELETE)
-        time.sleep(1)
-        survey_name = "Edit survey" + self.generate_random_string(3)
-        name_field.send_keys(survey_name)
-        print(f"Edited survey created with name: {survey_name}")
-
-    def change_language(self):
-        self.driver.find_element(*self.language_field).click()
-
-    def select_of_survey_language(self):
-        self.driver.find_element(*self.select_language_edit).click()
-
-    def click_on_save_button(self):
-        self.driver.find_element(*self.survey_save_button).click()
-
-    def click_on_save_survey_dilog_box(self):
-        self.driver.find_element(*self.save_survey_dialog_box).click()
-
-
-
     # Method for Open version and edit information
     def click_on_version_name_link(self):
         self.driver.find_element(*self.version_name_link).click()
@@ -461,7 +439,6 @@ class SurveyPage:
         time.sleep(1)
         self.driver.execute_script("arguments[0].scrollIntoView(true);", question_desc_field)
         time.sleep(0.5)
-        # question_desc_field.clear()
         question_desc_field.send_keys(random_description)
 
 
@@ -529,7 +506,6 @@ class SurveyPage:
                 cancel_btn.click()
                 print("Clicked on cancel button.")
                 return
-
         except:
             print("No 'no questions found' message, assuming questions are available.")
 
@@ -538,37 +514,10 @@ class SurveyPage:
         time.sleep(2)
         add_btn = self.driver.find_element(*self.add_question_btn)
         add_btn.click()
-
         self.driver.find_element(*self.save_question).click()
         time.sleep(2)
         self.driver.find_element(*self.save_edit_dilog_btn).click()
         time.sleep(1)
-
-
-    # Method for search type option functionality
-    def select_random_type_option(self):
-            # Open the dropdown
-            self.driver.find_element(*self.type_dropdown).click()
-            # Wait for the dropdown menu to be visible
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "ul[role='listbox']"))
-            )
-            # Get all the <li> options in the dropdown
-            options = self.driver.find_elements(By.CSS_SELECTOR, "ul[role='listbox'] li[role='option']")
-            if not options:
-                raise Exception("No options found in the type dropdown.")
-            # Pick a random option
-            random_option = random.choice(options)
-            selected_value = random_option.get_attribute("data-value")
-            selected_text = random_option.text
-            # Click the selected option
-            random_option.click()
-
-            self.driver.find_element(*self.clear_filter).click()
-            print("filter clear successfully")
-
-            print(f"Selected option: {selected_text} ")
-            return selected_value
 
 
     # Method for search functionality
@@ -599,6 +548,61 @@ class SurveyPage:
             cross_icon_element.click()
             time.sleep(1)
 
+    # Method for search type option functionality
+    def select_random_type_option(self):
+            # Open the dropdown
+            self.driver.find_element(*self.type_dropdown).click()
+            # Wait for the dropdown menu to be visible
+            WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "ul[role='listbox']"))
+            )
+            # Get all the <li> options in the dropdown
+            options = self.driver.find_elements(By.CSS_SELECTOR, "ul[role='listbox'] li[role='option']")
+            if not options:
+                raise Exception("No options found in the type dropdown.")
+            # Pick a random option
+            random_option = random.choice(options)
+            selected_value = random_option.get_attribute("data-value")
+            selected_text = random_option.text
+            # Click the selected option
+            random_option.click()
+            self.driver.find_element(*self.clear_filter).click()
+            print(f"Selected option: {selected_text} ")
+            return selected_value
+
+
+    # Method for preview question
+    def click_on_preview_and_cross_button(self):
+        self.driver.find_element(*self.preview_button).click()
+        time.sleep(1)
+        try:
+            no_preview_question_msg = self.driver.find_element(*self.preview_no_question_msg)
+            message_text = no_preview_question_msg.text.strip()
+            expected_messages = [
+                "This survey has no questions yet",
+                "Esta encuesta aún no tiene preguntas",
+                "Esta pesquisa ainda não tem perguntas"
+            ]
+            if message_text in expected_messages:
+                print("This survey has no questions yet")
+                self.driver.find_element(*self.preview_cross_button).click()
+                return
+
+        except:
+            print("Questions are available.")
+            version_text = self.driver.find_element(By.CSS_SELECTOR, '.css-qswjcr').text
+            preview_text = self.driver.find_element(By.CSS_SELECTOR, '.css-7g74ke').text
+
+            print("Version Page Text: ", version_text)
+            print("Preview Page Text:", preview_text)
+
+            if is_version_match(version_text, preview_text):
+                print("Version name matches!")
+            else:
+                print("Version name does not match.")
+        self.driver.find_element(*self.preview_cross_button).click()
+        time.sleep(1)
+
 
     # Method for create settings
     def click_on_edit_icon(self):
@@ -622,8 +626,6 @@ class SurveyPage:
             actions.send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER)
         actions.perform()
         time.sleep(3)
-        # actions.send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
-        print("Checkboxes selected successfully")
 
         parent_element = self.driver.find_element(By.XPATH, "/html/body/div[3]/div[3]/div/div/div[2]/div[1]/div/div/div/div")
         # Move to the parent element, offset by -10px in both directions, and click
@@ -651,7 +653,6 @@ class SurveyPage:
 
     def click_on_setting_save_btn(self):
         self.driver.find_element(*self.save_setting_btn).click()
-
 
 
     # Method for edit setting
@@ -712,8 +713,6 @@ class SurveyPage:
             else:
                 print("No options available in the dropdown.")
             time.sleep(3)
-
-            # Click save button
             self.driver.find_element(*self.save_setting_btn).click()
             time.sleep(1)
 
