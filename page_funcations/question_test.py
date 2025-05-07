@@ -8,10 +8,11 @@ from time import sleep
 from selenium.common import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-from Page_Funcations.driver_manager import DriverManager
-from Page_Object.survey_page import SurveyPage
-from Page_Object.question_page import QuestionPage
-from Config.config import Config
+from page_funcations.driver_manager import DriverManager
+from page_object.survey_page import SurveyPage
+from page_object.question_page import QuestionPage
+from test_data.translations import Translations
+from config.config import Config
 from faker import Faker
 
 class QuestionTest:
@@ -22,12 +23,22 @@ class QuestionTest:
 
 
     def create_question_page(self):
+        question_page = QuestionPage(self.driver)
+        expected_texts = Translations.get_translation(Config.language)
+
         self.question_page.click_on_question_tab()
         time.sleep(2)
         self.question_page.click_on_create_question_button()
         time.sleep(2)
         self.question_page.click_on_question_inside_create_btn()
         time.sleep(2)
+
+        assert question_page.is_create_question_title_text(expected_texts["createQuestionTitle"]), "Question title is mismatch"
+        assert question_page.is_question_type_error_text(expected_texts["questionTypeError"]), "Question type error mismatch"
+        assert question_page.is_abbreviation_name_error_text(expected_texts["abbreviationNameError"]), "Abbreviation name error mismatch"
+        assert question_page.is_question_description_error_text(expected_texts["questionDescriptionError"]), "Question description error mismatch"
+        print("all assertation is run successfully")
+
         self.question_page.click_on_question_type()
         time.sleep(2)
         self.question_page.click_on_abbreviation_question_field()
@@ -36,17 +47,35 @@ class QuestionTest:
         time.sleep(3)
         self.question_page.click_on_question_inside_create_btn()
         time.sleep(2)
+        success_message = question_page.get_success_message1()
+        print(f"Snackbar Text: {success_message}")
 
     def edit_question_page(self):
+        question_page = QuestionPage(self.driver)
+        expected_texts = Translations.get_translation(Config.language)
+
         self.question_page.click_on_edit_question_icon()
         time.sleep(2)
+        assert question_page.is_edit_question_title_text(expected_texts["editTitle"]), "Edit title is  mismatch"
+
         self.question_page.edit_question_field()
         time.sleep(2)
         self.question_page.click_on_question_inside_create_btn()
         time.sleep(3)
+        success_message = question_page.get_success_message_of_edit_question()
+        print(f"Snackbar Text: {success_message}")
 
     def try_to_delete_question(self):
-        self.question_page.click_on_delete_and_cancel_icon()
+        question_page = QuestionPage(self.driver)
+        expected_texts = Translations.get_translation(Config.language)
+
+        self.question_page.click_on_delete_icon()
+        time.sleep(1)
+        assert question_page.is_delete_question_dialog_title_text(expected_texts["deleteDialogTitle"]), "Delete dialog text is mismatch"
+        assert question_page.is_delete_question_dialog_body_text(expected_texts["deleteDialogBodyText"]), "Delete dialog body text is mismatch"
+        self.question_page.click_on_cancel_button()
+        time.sleep(1)
+
 
     def search_question_functionality(self):
         self.question_page.search_question_and_abbr_name()

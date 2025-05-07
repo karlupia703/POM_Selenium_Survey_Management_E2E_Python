@@ -1,11 +1,11 @@
 import os
 import time
 import pytest
-from Page_Funcations.login_test import LoginTest
-from Page_Funcations.survey_dashboard_test import SurveyDashboardTest
-from Page_Funcations.survey_test import SurveyTest
-from Page_Funcations.question_test import QuestionTest
-from Config.config import Config
+from page_funcations.login_test import LoginTest
+from page_funcations.survey_dashboard_test import SurveyDashboardTest
+from page_funcations.survey_test import SurveyTest
+from page_funcations.question_test import QuestionTest
+from config.config import Config
 
 class SurveyFixture:
     def __init__(self, survey, dashboard,questions):
@@ -37,7 +37,7 @@ def survey_test():
     return SurveyFixture(survey, surveyDashboard,questions )
 
 
-# Run survey functionality
+# # # Run survey functionality
 def test_create_survey(survey_test):
     survey_test.survey.create_survey()
     print("Survey was successfully created with an empty template.")
@@ -111,11 +111,11 @@ def test_dashboard_pagination(survey_test):
 # Run Question page functionality
 def test_create_questions(survey_test):
     survey_test.questions.create_question_page()
-    print("Question created successfully")
+    print("Question create successfully.")
 
 def test_edit_question_page(survey_test):
     survey_test.questions.edit_question_page()
-    print("Question updated successfully.")
+    # print("Question updated successfully.")
 
 def test_delete_question(survey_test):
     survey_test.questions.try_to_delete_question()

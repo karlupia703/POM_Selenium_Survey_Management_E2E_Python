@@ -8,9 +8,9 @@ from time import sleep
 from selenium.common import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-from Page_Funcations.driver_manager import DriverManager
-from Page_Object.survey_page import SurveyPage
-from Config.config import Config
+from page_funcations.driver_manager import DriverManager
+from page_object.survey_page import SurveyPage
+from config.config import Config
 from faker import Faker
 import unittest
 

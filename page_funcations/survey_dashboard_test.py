@@ -1,7 +1,7 @@
 import string
 import time
-from Page_Funcations.driver_manager import DriverManager
-from Page_Object.survey_dashboard_page import SurveyDashboardPage
+from page_funcations.driver_manager import DriverManager
+from page_object.survey_dashboard_page import SurveyDashboardPage
 from faker import Faker
 
 class SurveyDashboardTest:

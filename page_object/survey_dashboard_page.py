@@ -11,8 +11,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.core import driver
-from Config.config import Config
-from test_Data.translations import Translations
+from config.config import Config
+from test_data.translations import Translations
 
 
 class SurveyDashboardPage:
