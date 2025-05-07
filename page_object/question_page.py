@@ -11,8 +11,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.core import driver
-from Config.config import Config
-from test_Data.translations import Translations
+from config.config import Config
+from test_data.translations import Translations
 
 
 class QuestionPage:
@@ -26,16 +26,29 @@ class QuestionPage:
     create_question_btn = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/button"
     create_inside_ques_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
     question_type = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/div"
-    question_type_dropdown = By.XPATH, "/html/body/div[4]/div[3]/ul"
+    question_type_dropdown = By.XPATH, "/html/body/div[4]/div[3]/ul/li"
     abbreviation_question_field = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/div/input"
     question_description = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/div/div"
+    # For Assertions
+    create_question_title= By.XPATH, "/html/body/div[3]/div[3]/div/h2"
+    question_type_error = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/p"
+    abbreviation_name_error = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/p"
+    question_description_error = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/div/p"
+    success_message_of_create_question = By.XPATH, "//div[@class='MuiStack-root css-g1mdjx']"
+
 
     # Selectors for edit question
     edit_question_icon = By.XPATH, "//tbody/tr[1]/td[6]/div/button[1]"
+    # For Assertions
+    edit_question_title = By.XPATH, "/html/body/div[3]/div[3]/div/h2"
+    success_message_of_edit_question = By.XPATH, "//div[@class='MuiStack-root css-g1mdjx']"
 
     # Selectors for delete question
     delete_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div/div[1]/table/tbody/tr[1]/td[6]/div/button[2]"
     cancel_button = By.XPATH, "//button[normalize-space()='Cancel' or normalize-space()='Cancelar']"
+    # For assertions
+    delete_question_title = By.XPATH, "/html/body/div[3]/div[3]/div/h2"
+    delete_question_dialog_body_text = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/p"
 
     # Selectors for search question
     search_input = By.XPATH,"/html/body/div[1]/div/div/div[2]/div[2]/div[1]/div/div/div[1]/input"
@@ -76,6 +89,8 @@ class QuestionPage:
         if options:
             random_option = random.choice(options)
             random_option.click()
+            print("option",options)
+            print("random_option",random_option)
         else:
             print("No options available in the dropdown.")
             time.sleep(3)
@@ -100,9 +115,47 @@ class QuestionPage:
         print(f"Entered Description: {random_description}")
 
 
+    # Assertions Method to get the text of an element
+    def get_element_text(self, locator):
+        try:
+            element = self.wait.until(EC.presence_of_element_located(locator))
+            return element.text.strip()
+        except TimeoutException:
+            print(f"Element with locator {locator} not found within the specified time.")
+            return None
+
+    # Method to assert  text
+    def is_create_question_title_text(self, expected_text):
+        """Checks if the question type error text matches the expected text."""
+        return self.get_element_text(self.create_question_title) == expected_text
+
+    def is_question_type_error_text(self, expected_text):
+        """Checks if the question type error text matches the expected text."""
+        return self.get_element_text(self.question_type_error) == expected_text
+
+    def is_abbreviation_name_error_text(self, expected_text):
+        """Checks if the abbreviation name error text matches the expected text."""
+        return self.get_element_text(self.abbreviation_name_error) == expected_text
+
+    def is_question_description_error_text(self, expected_text):
+        """Checks if the question description error text matches the expected text."""
+        return self.get_element_text(self.question_description_error) == expected_text
+
+    def get_success_message1(self):
+        try:
+            return self.wait.until(EC.visibility_of_element_located(self.success_message_of_create_question)).text
+        except TimeoutException:
+            print("Success message not found within the timeout.")
+            return ""
+
+
+
     # Method for edit question
     def click_on_edit_question_icon(self):
         self.driver.find_element(*self.edit_question_icon).click()
+
+    def is_edit_question_title_text(self, expected_text):
+        return self.get_element_text(self.edit_question_title) == expected_text
 
     def edit_question_field(self):
         random_description = self.generate_random_description()
@@ -116,13 +169,35 @@ class QuestionPage:
         time.sleep(0.5)
         question_desc_field.send_keys(random_description)
 
+    def get_success_message_of_edit_question(self):
+        try:
+            return self.wait.until(EC.visibility_of_element_located(self.success_message_of_edit_question)).text
+        except TimeoutException:
+            print("Success message not found within the timeout.")
+            return ""
+
 
     # Method of Remove questions
-    def click_on_delete_and_cancel_icon(self):
+    def click_on_delete_icon(self):
         self.driver.find_element(*self.delete_icon).click()
         time.sleep(1)
+    def click_on_cancel_button(self):
         self.driver.find_element(*self.cancel_button).click()
         time.sleep(1)
+
+    # Assertion
+    def is_delete_question_dialog_title_text(self, expected_text):
+        return self.get_element_text(self.delete_question_title) == expected_text
+
+    def is_delete_question_dialog_body_text(self, expected_text):
+        return self.get_element_text(self.delete_question_dialog_body_text) == expected_text
+
+    # def get_success_message_of_delete_question(self):
+    #     try:
+    #         return self.wait.until(EC.visibility_of_element_located(self.success_message_of_edit_question)).text
+    #     except TimeoutException:
+    #         print("Success message not found within the timeout.")
+    #         return ""
 
 
     # Method for search functionality
