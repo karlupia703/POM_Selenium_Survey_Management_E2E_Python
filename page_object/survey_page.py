@@ -5,9 +5,7 @@ import string
 import time
 import datetime
 from re import search
-import fake
 from faker import Faker
-from bs4 import BeautifulSoup
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common import TimeoutException, NoSuchElementException
 from selenium.webdriver.chrome import webdriver

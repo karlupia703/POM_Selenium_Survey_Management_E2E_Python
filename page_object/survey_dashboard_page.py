@@ -1,6 +1,5 @@
 from faker import Faker
 import time
-from bs4 import BeautifulSoup
 from faker.generator import random
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common import TimeoutException, NoSuchElementException
@@ -13,7 +12,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.core import driver
 from config.config import Config
 from test_data.translations import Translations
-
 
 class SurveyDashboardPage:
     def __init__(self, driver):
