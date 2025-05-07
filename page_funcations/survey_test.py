@@ -1,8 +1,7 @@
 import string
 import time
 import random
-from lib2to3.pgen2 import driver
-import fake
+# from lib2to3.pgen2 import driver
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
 from selenium.common import TimeoutException, NoSuchElementException
