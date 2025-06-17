@@ -8,8 +8,3 @@ class Config:
     Email = os.getenv("user") # Add your username here
     Password = os.getenv("password") # Add your password here
 
-<<<<<<< HEAD
-    Email = "user@gmail.com"
-    Password = "password"
-=======
->>>>>>> fce352e (Change the XPATH to CSS_SELECTOR)
