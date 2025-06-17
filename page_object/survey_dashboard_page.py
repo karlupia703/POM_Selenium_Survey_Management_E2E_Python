@@ -1,17 +1,10 @@
 from faker import Faker
 import time
 from faker.generator import random
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common import TimeoutException, NoSuchElementException
-from selenium.webdriver.chrome import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.core import driver
-from config.config import Config
-from test_data.translations import Translations
 
 class SurveyDashboardPage:
     def __init__(self, driver):
@@ -20,24 +13,24 @@ class SurveyDashboardPage:
         self.wait = WebDriverWait(driver, 10)
 
     # Selectors for search survey
-    search_input = By.XPATH,"/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[1]/div/div[1]/input"
-    survey_name = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr[1]/td[2]"
-    search_cross_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[1]/div/div[1]/div[2]/button"
-    category_dropdown = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[1]/div/div[2]/div[1]"
-    category_cross_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[1]/div/div[2]/div[1]/button"
-    survey_tab = By.XPATH, "/html/body/div[1]/div/div/div[1]/div/nav/a[1]/div/div[2]/span"
+    search_input = By.CSS_SELECTOR, "[data-test-id='search-filter-surveys']"
+    survey_name = By.CSS_SELECTOR, "[data-test-id='text-survey-table-row-1-name']"
+    search_cross_icon = By.CSS_SELECTOR, "[data-test-id='btn-clear-surveys-search-input']"
+    category_dropdown = By.CSS_SELECTOR, "[data-test-id='select-filter-type-surveys']"
+    category_cross_icon = By.CSS_SELECTOR, "[data-test-id='btn-cancel-type-surveys']"
+    survey_tab = By.CSS_SELECTOR, "[data-test-id='text-navlink-surveys']"
 
     # Selectors for View survey
-    view_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr[1]/td[6]/div/button"
-    view_cancel_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[1]"
+    view_icon = By.CSS_SELECTOR, "[data-test-id='btn-view-survey-row-1']"
+    view_cancel_btn = By.CSS_SELECTOR, "[data-test-id='btn-cancel-view-survey']"
 
     # Edit basic information
-    dashboard_edit_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr[1]/td[6]/div/a/button"
-    name_input = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[3]/div/div/input"
-    language_field = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[6]/div/div/div"
-    select_language_edit = By.XPATH, "/html/body/div[3]/div[3]/ul/li[6]"
-    survey_save_button = By.XPATH, "//html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div/div[1]/div/div/button"
-    save_survey_dialog_box = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
+    dashboard_edit_icon = By.CSS_SELECTOR, "[data-test-id='btn-edit-survey-row-1']"
+    name_input = By.CSS_SELECTOR, "[data-test-id='input-survey-information-name']"
+    language_field = By.CSS_SELECTOR, "[data-test-id='select-survey-information-language-display']"
+    select_language_edit = By.CSS_SELECTOR, "[data-test-id='list-item-survey-information-language-option-zh_CN']"
+    survey_save_button = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div/div[1]/div/div/button"
+    save_survey_dialog_box = By.CSS_SELECTOR, "[data-test-id='btn-confirm-survey']"
 
     # Selectors for pagination
     right_arrow = By.XPATH, "//button[@aria-label='Go to the next page' or @aria-label='Ir a la página siguiente' or @aria-label='Ir para a próxima página']"
@@ -55,13 +48,11 @@ class SurveyDashboardPage:
 
     # Method for search functionality
     def search_survey_name(self):
-        """Clicks search field, gets question name from first row, and performs search."""
         search_field_element = self.driver.find_element(*self.search_input)
         search_field_element.click()
         # Extract question name from first row
         survey_name_element = self.driver.find_element(
-            By.XPATH,
-            "//table/tbody/tr[1]/td[2]"
+            By.CSS_SELECTOR, "[data-test-id='text-survey-table-row-1-name']"
         )
         survey_name = survey_name_element.text.strip()
         if not survey_name:
@@ -73,7 +64,6 @@ class SurveyDashboardPage:
         return survey_name
 
     def clear_survey_name(self):
-        """Clicks the cross icon to clear the search field."""
         cross_icon_element = self.driver.find_element(*self.search_cross_icon)
         cross_icon_element.click()
 

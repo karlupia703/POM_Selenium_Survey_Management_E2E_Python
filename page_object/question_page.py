@@ -2,18 +2,11 @@ import string
 from faker import Faker
 import time
 from faker.generator import random
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common import TimeoutException, NoSuchElementException
-from selenium.webdriver.chrome import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.core import driver
-from config.config import Config
-from test_data.translations import Translations
-
 
 class QuestionPage:
     def __init__(self, driver):
@@ -22,41 +15,42 @@ class QuestionPage:
         self.wait = WebDriverWait(driver, 10)
 
     # Selectors for Questions
-    question_tab = By.XPATH, "/html/body/div[1]/div/div/div[1]/div/nav/a[2]/div/div[2]"
-    create_question_btn = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[1]/button"
-    create_inside_ques_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
-    question_type = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/div"
-    question_type_dropdown = By.XPATH, "/html/body/div[4]/div[3]/ul/li"
-    abbreviation_question_field = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/div/input"
-    question_description = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/div/div"
+    question_tab = By.CSS_SELECTOR, "[data-test-id='text-navlink-questions']"
+    create_question_btn = By.CSS_SELECTOR, "[data-test-id='btn-open-create-question-dialog']"
+    create_inside_ques_btn = By.CSS_SELECTOR, "[data-test-id='btn-create-question']"
+    question_type = By.CSS_SELECTOR, "[data-test-id='select-create-question-question-type-display']"
+    question_type_dropdown = By.CSS_SELECTOR, "[data-test-id='dropdown-create-question-question-type-list']"
+    abbreviation_question_field = By.CSS_SELECTOR, "[data-test-id='input-create-question-abbreviation']"
+    question_description = By.CSS_SELECTOR, "[data-test-id='input-create-question-description']"
+
     # For Assertions
-    create_question_title= By.XPATH, "/html/body/div[3]/div[3]/div/h2"
-    question_type_error = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/p"
-    abbreviation_name_error = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/p"
-    question_description_error = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/div/p"
+    create_question_title= By.CSS_SELECTOR, "[data-test-id='text-create-question-dialog-title']"
+    question_type_error = By.CSS_SELECTOR, "[data-test-id='text-create-question-question-type-error-input']"
+    abbreviation_name_error = By.CSS_SELECTOR, "[data-test-id='text-create-question-abbreviation-input-error']"
+    question_description_error = By.CSS_SELECTOR, "[data-test-id='text-create-question-description-input-error']"
     success_message_of_create_question = By.XPATH, "//div[@class='MuiStack-root css-g1mdjx']"
 
-
     # Selectors for edit question
-    edit_question_icon = By.XPATH, "//tbody/tr[1]/td[6]/div/button[1]"
+    edit_question_icon = By.CSS_SELECTOR, "[data-test-id='btn-edit-question-row-1']"
+    edit_save_inside_ques_btn = By.CSS_SELECTOR, "[data-test-id='btn-edit-question']"
     # For Assertions
-    edit_question_title = By.XPATH, "/html/body/div[3]/div[3]/div/h2"
+    edit_question_title = By.CSS_SELECTOR, "[data-test-id='text-edit-question-dialog-title']"
     success_message_of_edit_question = By.XPATH, "//div[@class='MuiStack-root css-g1mdjx']"
 
     # Selectors for delete question
-    delete_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div/div[1]/table/tbody/tr[1]/td[6]/div/button[2]"
-    cancel_button = By.XPATH, "//button[normalize-space()='Cancel' or normalize-space()='Cancelar']"
+    delete_icon = By.CSS_SELECTOR, "[data-test-id='btn-delete-question-row-1']"
+    cancel_button = By.CSS_SELECTOR, "[data-test-id='btn-cancel-question-delete']"
     # For assertions
-    delete_question_title = By.XPATH, "/html/body/div[3]/div[3]/div/h2"
+    delete_question_title = By.CSS_SELECTOR, "[data-test-id='title-question-delete']"
     delete_question_dialog_body_text = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/p"
 
     # Selectors for search question
-    search_input = By.XPATH,"/html/body/div[1]/div/div/div[2]/div[2]/div[1]/div/div/div[1]/input"
-    question_name = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr[1]/td[2]"
-    search_cross_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div[1]/div/div/div[1]/div[2]/button"
-    type_dropdown = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div[1]/div/div/div[2]/div[1]"
-    type_cross_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div[1]/div/div/div[2]/div[1]/button"
-    survey_tab = By.XPATH, "/html/body/div[1]/div/div/div[1]/div/nav/a[1]/div/div[2]/span"
+    search_input = By.CSS_SELECTOR, "[data-test-id='search-filter-questions']"
+    question_name = By.CSS_SELECTOR, "[data-test-id='text-question-1-name']"
+    search_cross_icon = By.CSS_SELECTOR, "[data-test-id='btn-clear-questions-search-input']"
+    type_dropdown = By.CSS_SELECTOR, "[data-test-id='select-filter-type-questions']"
+    type_cross_icon = By.CSS_SELECTOR, "[data-test-id='btn-cancel-type-questions']"
+    survey_tab = By.CSS_SELECTOR, "[data-test-id='text-navlink-surveys']"
 
     # Selectors for pagination
     right_arrow = By.XPATH, "//button[@aria-label='Go to the next page' or @aria-label='Ir a la página siguiente' or @aria-label='Ir para a próxima página']"
@@ -87,10 +81,9 @@ class QuestionPage:
         self.driver.find_element(*self.question_type).click()
         options = self.driver.find_elements(*self.question_type_dropdown)
         if options:
-            random_option = random.choice(options)
-            random_option.click()
-            print("option",options)
-            print("random_option",random_option)
+            random.shuffle(options)  # Shuffle to make selection more random
+            selected_option = options[0]
+            selected_option.click()
         else:
             print("No options available in the dropdown.")
             time.sleep(3)
@@ -148,8 +141,6 @@ class QuestionPage:
             print("Success message not found within the timeout.")
             return ""
 
-
-
     # Method for edit question
     def click_on_edit_question_icon(self):
         self.driver.find_element(*self.edit_question_icon).click()
@@ -168,6 +159,9 @@ class QuestionPage:
         self.driver.execute_script("arguments[0].scrollIntoView(true);", question_desc_field)
         time.sleep(0.5)
         question_desc_field.send_keys(random_description)
+
+    def click_on_question_inside_edit_save_btn(self):
+        self.driver.find_element(*self.edit_save_inside_ques_btn).click()
 
     def get_success_message_of_edit_question(self):
         try:
@@ -192,13 +186,6 @@ class QuestionPage:
     def is_delete_question_dialog_body_text(self, expected_text):
         return self.get_element_text(self.delete_question_dialog_body_text) == expected_text
 
-    # def get_success_message_of_delete_question(self):
-    #     try:
-    #         return self.wait.until(EC.visibility_of_element_located(self.success_message_of_edit_question)).text
-    #     except TimeoutException:
-    #         print("Success message not found within the timeout.")
-    #         return ""
-
 
     # Method for search functionality
     def search_question_and_abbr_name(self):
@@ -208,7 +195,8 @@ class QuestionPage:
 
         # Extract question name (column 2)
         question_name = self.driver.find_element(
-            By.XPATH, "//table/tbody/tr[1]/td[2]"
+            By.CSS_SELECTOR, "[data-test-id='text-question-1-name']"
+            # By.XPATH, "//table/tbody/tr[1]/td[2]"
         ).text.strip()
 
         if not question_name:
@@ -240,7 +228,6 @@ class QuestionPage:
         return question_name, abbr_name
 
     def search_with_random_text_and_check_no_results(self):
-        """Enters random text in the search field and checks for 'No results found' message."""
         # Generate random search text
         random_text = ''.join(random.choices(string.ascii_letters + string.digits, k=7))
 
@@ -252,7 +239,7 @@ class QuestionPage:
 
         # Check for 'No results found' message
         try:
-            no_result_element = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div[2]/div/div/table/tbody/tr/td/div/div/p")
+            no_result_element = self.driver.find_element(By.CSS_SELECTOR, "[data-test-id='no-data-title']")
             if no_result_element.is_displayed():
                 print(f"Message displayed: 'No results found' for search '{random_text}'")
             else:
@@ -290,6 +277,7 @@ class QuestionPage:
     def click_on_rows_per_page(self):
         self.driver.find_element(*self.rows_par_page).click()
         self.driver.find_element(*self.rows_par_20_page).click()
+
     def is_pagination_arrow_available(self, arrow_locator):
             elements = self.driver.find_elements(*arrow_locator)
             return len(elements) > 0

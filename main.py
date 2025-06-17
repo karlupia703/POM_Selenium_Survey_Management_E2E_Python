@@ -37,7 +37,7 @@ def survey_test():
     return SurveyFixture(survey, surveyDashboard,questions )
 
 
-# # # Run survey functionality
+# Run survey functionality
 def test_create_survey(survey_test):
     survey_test.survey.create_survey()
     print("Survey was successfully created with an empty template.")
@@ -77,15 +77,23 @@ def test_preview_question(survey_test):
 def test_search_question_name(survey_test):
     survey_test.survey.test_search_question_name()
     print("question search successfully")
-
-def test_create_settings(survey_test):
+#
+def test_create_settings_with_language_or_organization(survey_test):
     survey_test.survey.create_settings()
     print("Configuration saved")
+
+def test_create_setting_with_language(survey_test):
+    survey_test.survey.create_setting_with_language()
+    print("Configuration saved with language")
+
+def test_create_setting_with_organization(survey_test):
+    survey_test.survey.create_setting_with_organization()
+    print("Configuration saved with organization")
 
 def test_edit_setting(survey_test):
     survey_test.survey.edit_setting()
     print("Configuration updated")
-
+#
 def test_already_exist_survey(survey_test):
     survey_test.survey.already_exist_survey()
 
@@ -106,7 +114,7 @@ def test_edit_survey_basic_information(survey_test):
 def test_dashboard_pagination(survey_test):
     survey_test.dashboard.test_pagination()
     print("Pagination is working successfully")
-
+#
 
 # Run Question page functionality
 def test_create_questions(survey_test):
@@ -115,7 +123,7 @@ def test_create_questions(survey_test):
 
 def test_edit_question_page(survey_test):
     survey_test.questions.edit_question_page()
-    # print("Question updated successfully.")
+    print("Question updated successfully.")
 
 def test_delete_question(survey_test):
     survey_test.questions.try_to_delete_question()

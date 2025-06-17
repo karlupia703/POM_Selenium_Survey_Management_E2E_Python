@@ -1,9 +1,6 @@
-import time
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from config.config import Config
 
 class LoginPage:
     def __init__(self, driver):
@@ -11,18 +8,18 @@ class LoginPage:
         self.wait = WebDriverWait(driver, 10)
 
     # Selectors
-    language_dropdown = By.XPATH,"/html/body/div/div/div[3]/div/div"
-    select_english_language = By.CSS_SELECTOR,"[data-test-id='text-language-option-English (EE.UU.)']"
-    google_sign_in_button = By.XPATH,"/html/body/div/div/button/div/span"
+    language_dropdown = By.CSS_SELECTOR, "[data-test-id='select-language']"
+    select_english_language = By.CSS_SELECTOR, "[data-test-id='label-language-en_US']"
+    google_sign_in_button = By.CSS_SELECTOR, "[data-test-id='text-google-signin-label']"
     email_input = By.XPATH, "//input[@type='email']"
     email_next_button = By.XPATH, "//span[text()='Next']"
     password_input = By.XPATH, "//input[@type='password']"
     password_next_button = By.XPATH, "//span[text()='Next']"
     # Selectors for Assertions
-    login_title = By.XPATH, "/html/body/div/div/div[1]/span"
-    google_button_text = By.XPATH, "/html/body/div/div/button/div/span"
-    access_text_of_survey_app = By.XPATH, "/html/body/div/div/div[2]/span[2]"
-    sign_in_text = By.XPATH, "/html/body/div/div/div[2]/span[1]"
+    login_title =By.CSS_SELECTOR, "[data-test-id='title-login-header']"
+    google_button_text = By.CSS_SELECTOR, "[data-test-id='text-google-signin-label']"
+    access_text_of_survey_app =By.CSS_SELECTOR, "[data-test-id='text-login-header-description']"
+    sign_in_text = By.CSS_SELECTOR, "[data-test-id='text-login-subtitle']"
 
     def click_language_dropdown(self):
         self.driver.find_element(*self.language_dropdown).click()

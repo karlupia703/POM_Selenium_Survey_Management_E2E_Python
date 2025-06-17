@@ -1,21 +1,14 @@
-import logging
+
 import random
 import re
-import string
 import time
-import datetime
-from re import search
 from faker import Faker
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common import TimeoutException, NoSuchElementException
-from selenium.webdriver.chrome import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.core import driver
-from config.config import Config
 from test_data.translations import Translations
 
 
@@ -29,127 +22,129 @@ def is_version_match(version_text, preview_text):
 
 class SurveyPage:
     def __init__(self, driver):
-        # self.faker = None
         self.faker = Faker()
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
 
+
     # Selectors for create survey
-    create_button = By.XPATH,"/html/body/div[1]/div/div/div[2]/div/div[1]/button"
-    survey_name_input_field = By.XPATH,"/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/div/input"
-    abbreviation_input_field = By.XPATH,"/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/div/input"
-    category_dropdown_field = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/div/div"
-    SSTP_data = By.XPATH, "/html/body/div[4]/div[3]/ul/li[1]"
-    SSAC_data = By.XPATH, "/html/body/div[4]/div[3]/ul/li[2]"
-    modality_dropdown_field = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[4]/div/div/div"
-    in_person = By.XPATH, "/html/body/div[4]/div[3]/ul/li[1]"
-    virtual = By.XPATH, "/html/body/div[4]/div[3]/ul/li[2]"
-    language_dropdown_field = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[5]/div/div/div"
-    select_language_field = By.XPATH, "/html/body/div[4]/div[3]"
-    create_inside_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
-    survey_cancel_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[1]"
-    survey_tab = By.XPATH, "/html/body/div[1]/div/div/div[1]/div/nav/a[1]/div/div[2]/span"
+    create_button = By.CSS_SELECTOR, "[data-test-id='btn-open-create-survey-dialog']"
+    survey_name_input_field =By.CSS_SELECTOR,"[data-test-id=input-create-survey-name]"
+    abbreviation_input_field = By.CSS_SELECTOR, "[data-test-id='input-create-survey-abbreviation']"
+    category_dropdown_field = By.CSS_SELECTOR, "[data-test-id='select-create-survey-category']"
+    SSTP_data =By.CSS_SELECTOR, "[data-test-id='text-create-survey-category-select-input-option-5fa59a04-45d0-4a09-90a8-de08325bc16b']"
+    SSAC_data = By.CSS_SELECTOR, "[data-test-id='text-create-survey-category-select-input-option-bbe26d7a-e22f-4f2a-bf4d-09c4dfcf5c9b']"
+    modality_dropdown_field = By.CSS_SELECTOR,"[data-test-id='select-create-survey-modality']"
+    in_person = By.CSS_SELECTOR, "[data-test-id='text-create-survey-modality-select-input-option-in_person']"
+    virtual = By.CSS_SELECTOR, "[data-test-id='text-create-survey-modality-select-input-option-virtual']"
+    language_dropdown_field = By.CSS_SELECTOR, "[data-test-id='select-create-survey-language-display']"
+    select_language_option_field = By.CSS_SELECTOR, "[data-test-id^='list-item-create-survey-language-option']"
+    create_inside_button = By.CSS_SELECTOR, "[data-test-id='btn-submit-create-survey']"
+    survey_cancel_btn = By.CSS_SELECTOR, "[data-test-id='btn-cancel-create-survey']"
+    survey_tab = By.CSS_SELECTOR, "[data-test-id='text-navlink-surveys']"
 
     # Version options case
-    empty_template = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/span"
-    continue_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
-    version_name_input = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/div/input"
-    version_abbreviation_input = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/div/input"
-    accept_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[3]"
-    version_cancel_button = By.XPATH, "/html/body/div[4]/div[3]/div/div[2]/button[1]"
-    version_empty_template_cancel_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
+    empty_template = By.CSS_SELECTOR, "[data-test-id='title-create-survey-version-empty-template']"
+    continue_button = By.CSS_SELECTOR, "[data-test-id='btn-continue-version-options']"
+    version_name_input = By.CSS_SELECTOR, "[data-test-id='input-create-version-name']"
+    version_abbreviation_input = By.CSS_SELECTOR, "[data-test-id='input-create-version-abbreviation']"
+    accept_button = By.CSS_SELECTOR, "[data-test-id='btn-create-survey-version']"
+    version_cancel_button = By.CSS_SELECTOR, "[data-test-id='btn-cancel-version-options']"
+    version_empty_template_cancel_btn = By.CSS_SELECTOR, "[data-test-id='btn-cancel-create-survey-version']"
 
     # Copy from another version case
-    new_version = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div/div[1]/div/button"
-    copy_from_another_version = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/span"
-    continue_button_for_copy = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
-    survey_search_input = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div[1]/div/div"
-    radio_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div[3]/div[1]/table/tbody/tr/td[1]/span/input"
-    no_surveys_msg = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div[3]/div/table/tbody/tr/td/div/div/p"
-    preview_question_message = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/div[2]/div/div/div/span[1]"
-    Version_copy_continue_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[3]"
-    Version_name_input_field = By.XPATH, "/html/body/div[4]/div[3]/div/div[1]/div/div[1]/div/div/input"
-    Version_abbre_input_field = By.XPATH,"/html/body/div[4]/div[3]/div/div[1]/div/div[2]/div/div/input"
-    all_option = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/fieldset/div/label[3]/span[1]/input"
-    mandatory_status = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[4]/label/span[1]/span[1]"
-    accept_version_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[3]"
+    new_version = By.CSS_SELECTOR, "[data-test-id='btn-open-create-new-version-dialog']"
+    copy_from_another_version = By.CSS_SELECTOR, "[data-test-id='title-copy-survey-version']"
+    continue_button_for_copy = By.CSS_SELECTOR, "[data-test-id='btn-continue-version-options']"
+    survey_search_input = By.CSS_SELECTOR, "[data-test-id='survey-version-select-input']"
+    radio_button = By.CSS_SELECTOR, "[data-test-id='checkbox-select-row-1']"
+    no_surveys_msg = By.CSS_SELECTOR, "[data-test-id='no-data-title']"
+    preview_question_message = By.CSS_SELECTOR, "[data-test-id='text-no-data-found-primary-message']"
+    Version_copy_continue_btn = By.CSS_SELECTOR, "[data-test-id='btn-continue-copy-survey-version']"
+    Version_name_input_field = By.CSS_SELECTOR, "[data-test-id='input-create-version-name']"
+    Version_abbre_input_field = By.CSS_SELECTOR, "[data-test-id='input-create-version-abbreviation']"
+    all_option = By.CSS_SELECTOR, "[data-test-id='create-version-option-all']"
+    mandatory_status = By.CSS_SELECTOR, "[data-test-id='input-create-survey-version-mandatory']"
+    accept_version_button = By.CSS_SELECTOR, "[data-test-id='btn-create-survey-version']"
 
     # Open version and edit information
-    version_name_link = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div/div[2]/div[1]/table/tbody/tr/td[2]/a"
-    edit_version_name_input = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/div[1]/div/div/input"
-    content_mandatory_button = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[2]/div/div/div[1]/label/span[1]/span[1]"
-    version_save_button = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div[2]/button[2]"
-    version_save_dialog_box = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
-
-    # Selectors for create setting
-    settings_page_btn = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[2]/div/button[3]"
-    create_setting_btn = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[4]/div/div/div[1]/button"
-    programs_dropdown = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[2]/div[1]/div/div/div/div"
-    language_dropdown = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[2]/div[2]/div/div/div"
-    organization_dropdown = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[2]/div[3]/div/div/div"
-    save_setting_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[3]/button[2]"
-    cancel_setting_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[3]/button[2]"
-    language_options = By.XPATH, "/html/body/div[4]/div[3]"
-    change_language_dropdown = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[2]/div[2]/div/div/div"
-    organization_list = By.XPATH, "/html/body/div[4]/div[3]"
-    edit_icon = By.XPATH, "//tbody/tr[1]/td[6]/div[1]/a[1]/button[1]"
-
-    # Selectors for edit setting
-    survey_setting_tab = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[4]/div/div/div[2]/div[1]/div"
-    activity_toggle = By.XPATH, "/html/body/div[3]/div[3]/div/div/div[1]/label/span[1]"
-    search_input_field = By.XPATH, "/html/body/div[4]/div[3]/div[1]/div/div/input"
-    filled_checkbox = By.CSS_SELECTOR, "[data-testid='CheckBoxIcon']"
-    blank_checkbox = By.CSS_SELECTOR, "[data-testid='CheckBoxOutlineBlankIcon']"
+    version_name_link = By.CSS_SELECTOR, "[data-test-id='link-navigate-to-survey-version-1']"
+    edit_version_name_input = By.CSS_SELECTOR, "[data-test-id='input-version-information-name']"
+    content_mandatory_button = By.CSS_SELECTOR, "[data-test-id='switch-survey-version-mandatory']"
+    version_save_button = By.CSS_SELECTOR, "[data-test-id='btn-save-survey']"
+    version_save_dialog_box = By.CSS_SELECTOR, "[data-test-id='btn-confirm-survey']"
 
     # Selectors for Questions
-    question_tab = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[1]/div/div[2]/div/button[2]"
-    create_question_btn = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[2]/div/button[2]"
-    create_inside_ques_btn = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
-    question_type = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[1]/div/div"
-    question_type_dropdown = By.XPATH, "/html/body/div[4]/div[3]/ul"
-    abbreviation_question_field = By.XPATH,"/html/body/div[3]/div[3]/div/div[1]/div/div[2]/div/div/input"
-    question_description = By.XPATH, "/html/body/div[3]/div[3]/div/div[1]/div/div[3]/div/div"
-    save_question = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div[2]/button[2]"
-    save_dilog_btn = By.XPATH, "/html/body/div[4]/div[3]/div/div[2]/button[2]"
-    save_edit_dilog_btn = By.CSS_SELECTOR, ".MuiButtonBase-root.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-text.MuiButton-textPrimary.MuiButton-sizeMedium.MuiButton-textSizeMedium.MuiButton-colorPrimary.confirmation-modal_confirm-button__lZBTH.css-ger89v"
+    question_tab = By.CSS_SELECTOR, "[data-test-id='tab-survey-version-questions']"
+    create_question_btn = By.CSS_SELECTOR, "[data-test-id='btn-open-create-survey-question-dialog']"
+    create_inside_ques_btn = By.CSS_SELECTOR, "[data-test-id='btn-create-survey-question']"
+    question_type = By.CSS_SELECTOR, "[data-test-id='select-create-survey-question-question-type-display']"
+    question_type_dropdown = By.CSS_SELECTOR, "[data-test-id='dropdown-create-survey-question-question-type-list']"
+    abbreviation_question_field = By.CSS_SELECTOR, "[data-test-id='input-create-survey-question-abbreviation']"
+    question_description = By.CSS_SELECTOR, "[data-test-id='input-create-survey-question-description']"
+    save_question = By.CSS_SELECTOR, "[data-test-id='btn-save-survey']"
+    save_dilog_btn = By.CSS_SELECTOR, "[data-test-id='btn-confirm-survey']"
 
     # Selectors for edit question
-    edit_question_icon = By.XPATH, "//tbody/tr[1]/td[8]/div[1]/button[1]"
+    edit_question_icon = By.CSS_SELECTOR, "[data-test-id='btn-edit-survey-question-row-1']"
+    edit_question_save = By.CSS_SELECTOR, "[data-test-id='btn-edit-survey-question']"
+    save_edit_dilog_btn = By.CSS_SELECTOR, "[data-test-id='btn-confirm-survey']"
+
 
     # Selectors for delete question
-    remove_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[1]/td[8]/div/button[2]"
-    inside_remove_icon = By.XPATH, "(//button[normalize-space()='Remove'] | //button[normalize-space()='Eliminar'] | //button[normalize-space()='Remover'])[1]"
+    remove_icon = By.CSS_SELECTOR, "[data-test-id='btn-delete-survey-question-row-1']"
+    inside_remove_icon = By.CSS_SELECTOR, "[data-test-id='btn-confirm-survey-question-remove']"
+    save_delete_question = By.CSS_SELECTOR, "[data-test-id='btn-save-survey']"
+    save_dilog_delete_question = By.CSS_SELECTOR, "[data-test-id='btn-confirm-survey']"
 
     # Selectors for Add Questions
-    add_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[2]/div/button[1]"
-    no_questions_found = By.XPATH, "//p[contains(@class, 'MuiTypography-noWrap') and (normalize-space(text())='No questions found' or normalize-space(text())='No se ha encontrado ninguna pregunta' or normalize-space(text())='Nenhuma pergunta encontrada')]"
-    cancel_add_question_page = By.XPATH, "//button[(normalize-space(text())='Cancel' or normalize-space(text())='Cancelar') and contains(@class, 'MuiButton-root')]"
-    select_all_checkbox = By.XPATH, "//input[@aria-label='Select all' or @aria-label='Seleccionar todo' or @aria-label='Selecionar tudo']"
-    add_question_btn = By.XPATH, "//button[normalize-space(text())='Add' or normalize-space(text())='Agregar' or normalize-space(text())='Adicionar']"
+    add_icon = By.CSS_SELECTOR, "[data-test-id='btn-open-add-survey-question-dialog']"
+    no_questions_found = By.CSS_SELECTOR, "[data-test-id='no-data-title']"
+    cancel_add_question_page = By.CSS_SELECTOR, "[data-test-id='btn-sidedrawer-cancel-add-survey-question']"
+    select_all_checkbox = By.CSS_SELECTOR, "[data-test-id='checkbox-select-all-rows']"
+    add_question_btn = By.CSS_SELECTOR, "[data-test-id='btn-sidedrawer-add-survey-question']"
+
 
     # Selectors for Search question
-    search_field = By.XPATH, "//*[@id='simple-tabpanel-1']/div/div/div[1]/div/div[1]/div/div[1]/input"
-    question_name = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[1]/td[2]"
-    search_cross_icon   = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[1]/div[2]/button"
-    type_dropdown = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/div[1]"
-    clear_filter = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/button"
-    table_body = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div"
-    abbreviation_dropdown = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/div[2]/span"
-    input = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[1]/div/div[2]/div[2]/span/p"
-    show_remove = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[1]/div/div[2]/label/span[2]"
-    full_table = By.XPATH, "/table/tbody/div"
+    search_field = By.CSS_SELECTOR, "[data-test-id='search-filter-survey-question-filters']"
+    search_cross_icon   = By.CSS_SELECTOR, "[data-test-id='btn-clear-survey-question-filters-search-input']"
+    type_dropdown = By.CSS_SELECTOR, "[data-test-id='select-filter-type-survey-question-filters']"
+    clear_filter = By.CSS_SELECTOR, "[data-test-id='btn-clear-survey-question-filters']"
+    abbreviation_dropdown = By.CSS_SELECTOR, "[data-test-id='text-abbreviation-survey-question-filters-label']"
+    show_remove = By.CSS_SELECTOR, "[data-test-id='switch-survey-question-show-deleted']"
 
     # Selectors of preview question
-    preview_button = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div[2]/button[1]"
-    preview_cross_button = By.XPATH, "//button[@aria-label='close']"
-    preview_no_question_msg = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/div/div/div/span[1]"
-    dashboard_edit_icon = By.XPATH, "/html/body/div[1]/div/div/div[2]/div/div[2]/div/div[2]/div/div[1]/table/tbody/tr[1]/td[6]/div/a/button"
+    preview_button = By.CSS_SELECTOR, "[data-test-id='btn-open-preview-modal']"
+    preview_cross_button = By.CSS_SELECTOR, "[data-test-id='btn-close-preview-survey']"
+    preview_no_question_msg = By.CSS_SELECTOR, "[data-test-id='text-no-data-found-primary-message']"
 
     # Selectors of restore question
-    restore_button = By.XPATH, "//tbody/tr[2]/td[8]/div[1]/button[1]//*[name()='svg']"
-    restore_popup_button = By.XPATH, "/html/body/div[3]/div[3]/div/div[2]/button[2]"
-    source  = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[2]/td[1]"
-    target  = By.XPATH, "/html/body/div[1]/div/div/div[2]/div[2]/div/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div/table/tbody/tr[1]/td[1]"
+    restore_button = By.CSS_SELECTOR, "[data-test-id='btn-restore-question-row-2']"
+    restore_popup_button = By.CSS_SELECTOR, "[data-test-id='btn-confirm-restore-survey-question']"
+    source  = By.CSS_SELECTOR, "[data-test-id='drag-handle-row-2']"
+    target  = By.CSS_SELECTOR, "[data-test-id='drag-handle-row-1']"
+
+
+    # Selectors for create setting
+    settings_page_btn = By.CSS_SELECTOR, "[data-test-id='tab-survey-version-settings']"
+    create_setting_btn = By.CSS_SELECTOR, "[data-test-id='btn-open-survey-setting-create-dialog']"
+    programs_dropdown = By.CSS_SELECTOR, "[data-test-id='select-survey-settings-program-display']"
+    language_dropdown = By.CSS_SELECTOR, "[data-test-id='select-survey-settings-language']"
+    organization_dropdown = By.CSS_SELECTOR, "[data-test-id='select-survey-settings-organization-display']"
+    save_setting_btn = By.CSS_SELECTOR, "[data-test-id='btn-create-survey-setting']"
+    cancel_setting_btn = By.CSS_SELECTOR, "[data-test-id='btn-cancel-create-survey-setting']"
+    language_options = By.CSS_SELECTOR, "[data-test-id='dropdown-survey-settings-language-list'] li"
+    change_language_dropdown = By.CSS_SELECTOR, "[data-test-id='select-survey-settings-language-display']"
+    edit_save_setting_btn = By.CSS_SELECTOR, "[data-test-id='btn-edit-survey-setting']"
+    organization_options = By.CSS_SELECTOR, "[data-test-id='dropdown-survey-settings-organization-list'] li"
+    language_or_organization_text = By.CSS_SELECTOR, "[data-test-id='helper-text']"
+
+    # Selectors for edit setting
+    survey_setting_tab = By.CSS_SELECTOR, "[data-test-id='text-survey-setting-label']"
+    activity_toggle = By.CSS_SELECTOR, "[data-test-id='switch-survey-setting-state']"
+    search_input_field = By.CSS_SELECTOR, "[data-test-id='input-search-survey-settings-program']"
+    filled_checkbox = By.CSS_SELECTOR, "[data-testid='CheckBoxIcon']"
+    blank_checkbox = By.CSS_SELECTOR, "[data-testid='CheckBoxOutlineBlankIcon']"
 
 
     def select_random_abbreviation(self):
@@ -202,7 +197,15 @@ class SurveyPage:
 
     def select_language(self):
         self.driver.find_element(*self.language_dropdown_field).click()
-        self.driver.find_element(*self.select_language_field).click()
+        options = self.driver.find_elements(*self.select_language_option_field)
+        if options:
+           random.shuffle(options)  # Shuffle to make selection more random
+           selected_option = options[0]
+           print("Selecting language:", selected_option.text)
+           selected_option.click()
+        else:
+            print("No options available in the dropdown.")
+
 
     def click_on_inside_create_button(self):
         self.driver.find_element(*self.create_inside_button).click()
@@ -391,8 +394,9 @@ class SurveyPage:
         self.driver.find_element(*self.question_type).click()
         options = self.driver.find_elements(*self.question_type_dropdown)
         if options:
-            random_option = random.choice(options)
-            random_option.click()
+            random.shuffle(options)
+            selected_option = options[0]
+            selected_option.click()
         else:
             print("No options available in the dropdown.")
             time.sleep(3)
@@ -441,6 +445,8 @@ class SurveyPage:
 
 
     def click_on_save_edit_question(self):
+        self.driver.find_element(*self.edit_question_save).click()
+        time.sleep(2)
         self.driver.find_element(*self.save_question).click()
         time.sleep(2)
         self.driver.find_element(*self.save_edit_dilog_btn).click()
@@ -452,13 +458,18 @@ class SurveyPage:
         self.driver.find_element(*self.remove_icon).click()
         self.driver.find_element(*self.inside_remove_icon).click()
 
+    def click_on_save_delete_question(self):
+        self.driver.find_element(*self.save_delete_question).click()
+        self.driver.find_element(*self.save_dilog_delete_question).click()
+
+
 
     # Method of show remove question
     def handle_show_removed_functionality(self):
         self.driver.find_element(*self.show_remove).click()
         time.sleep(2)
         self.driver.find_element(*self.restore_button).click()
-        time.sleep(1)
+        time.sleep(2)
         self.driver.find_element(*self.restore_popup_button).click()
         time.sleep(2)
 
@@ -520,15 +531,13 @@ class SurveyPage:
 
     # Method for search functionality
     def search_question_name_from_first_row(self):
-            """Clicks search field, gets question name from first row, and performs search."""
             # Click the search field
             search_field_element = self.driver.find_element(*self.search_field)
             search_field_element.click()
 
             # Extract question name from first row
             question_name_element = self.driver.find_element(
-                By.XPATH,
-                "//table/tbody/tr[1]/td[2]/div"
+                By.CSS_SELECTOR, "[data-test-id='text-survey-question-1-name']"
             )
             question_name = question_name_element.text.strip()
             if not question_name:
@@ -536,7 +545,7 @@ class SurveyPage:
 
             # Enter question name into the search field
             search_field_element.send_keys(question_name)
-            time.sleep(2)  # replace with explicit wait if needed
+            time.sleep(2)
 
             return question_name
 
@@ -548,7 +557,6 @@ class SurveyPage:
 
     # Method for search type option functionality
     def select_random_type_option(self):
-            # Open the dropdown
             self.driver.find_element(*self.type_dropdown).click()
             # Wait for the dropdown menu to be visible
             WebDriverWait(self.driver, 10).until(
@@ -603,9 +611,6 @@ class SurveyPage:
 
 
     # Method for create settings
-    def click_on_edit_icon(self):
-        self.driver.find_element(*self.edit_icon).click()
-
     def click_on_setting_page(self):
         self.driver.find_element(*self.settings_page_btn).click()
 
@@ -629,23 +634,41 @@ class SurveyPage:
         # Move to the parent element, offset by -10px in both directions, and click
         ActionChains(self.driver).move_to_element_with_offset(parent_element, -10, -10).click().perform()
 
+        # Assertions Method to get the text of an element
+    def get_element_text(self, locator):
+        try:
+            element = self.wait.until(EC.presence_of_element_located(locator))
+            return element.text.strip()
+        except TimeoutException:
+            print(f"Element with locator {locator} not found within the specified time.")
+            return None
+
+        # Method to assert  text
+    def is_setting_helper_text(self, expected_text):
+        return self.get_element_text(self.language_or_organization_text) == expected_text
+
+
     def click_on_language_dropdown(self):
         self.driver.find_element(*self.language_dropdown).click()
         options = self.driver.find_elements(*self.language_options)
         if options:
-            random_option = random.choice(options)
-            random_option.click()
+            random.shuffle(options)  # Shuffle to make selection more random
+            selected_option = options[0]
+            print("Selecting language:", selected_option.text)
+            selected_option.click()
         else:
             print("No options available in the dropdown.")
 
     def click_on_organization_dropdown(self):
         self.driver.find_element(*self.organization_dropdown).click()
         options = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_all_elements_located(self.organization_list)
+            EC.presence_of_all_elements_located(self.organization_options)
         )
         if options:
-            random_option = random.choice(options)
-            random_option.click()
+            random.shuffle(options)  # Shuffle to make selection more random
+            selected_option = options[0]
+            print("Selecting organization:", selected_option.text)
+            selected_option.click()
         else:
             print("No organization list in the dropdown.")
 
@@ -701,7 +724,6 @@ class SurveyPage:
             parent_element = self.driver.find_element(By.XPATH,"/html/body/div[3]/div[3]/div/div/div[2]/div[1]/div/div/div/div")
             ActionChains(self.driver).move_to_element_with_offset(parent_element, -10, -10).click().perform()
 
-
     def edit_change_language(self):
             self.driver.find_element(*self.change_language_dropdown).click()
             options = self.driver.find_elements(*self.language_options)
@@ -711,7 +733,7 @@ class SurveyPage:
             else:
                 print("No options available in the dropdown.")
             time.sleep(3)
-            self.driver.find_element(*self.save_setting_btn).click()
+            self.driver.find_element(*self.edit_save_setting_btn).click()
             time.sleep(1)
 
     def click_on_activity_toggle(self):

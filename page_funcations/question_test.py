@@ -1,14 +1,5 @@
-import string
 import time
-import random
-# from lib2to3.pgen2 import driver
-from selenium.webdriver.support import expected_conditions as EC
-from time import sleep
-from selenium.common import TimeoutException, NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from page_funcations.driver_manager import DriverManager
-from page_object.survey_page import SurveyPage
 from page_object.question_page import QuestionPage
 from test_data.translations import Translations
 from config.config import Config
@@ -59,7 +50,7 @@ class QuestionTest:
 
         self.question_page.edit_question_field()
         time.sleep(2)
-        self.question_page.click_on_question_inside_create_btn()
+        self.question_page.click_on_question_inside_edit_save_btn()
         time.sleep(3)
         success_message = question_page.get_success_message_of_edit_question()
         print(f"Snackbar Text: {success_message}")
@@ -85,9 +76,6 @@ class QuestionTest:
         time.sleep(1)
 
     def question_pagination(self):
-        self.question_page.click_on_question_tab()
-        time.sleep(2)
-
         question_page = QuestionPage(self.driver)
         self.question_page.click_on_rows_per_page()
         time.sleep(2)

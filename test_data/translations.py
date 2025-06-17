@@ -14,7 +14,8 @@ class Translations:
             "questionDescriptionError": "Question description is required",
             "editTitle": "Edit question",
             "deleteDialogTitle": "Delete question",
-            "deleteDialogBodyText": "Are you sure you want to delete this question?"
+            "deleteDialogBodyText": "Are you sure you want to delete this question?",
+            "LanguageOrOrganizationTitle": "At least one of these fields is required: Language or Organization."
 
         },
         "Español": {
@@ -29,8 +30,8 @@ class Translations:
             "questionDescriptionError": "La descripción de la pregunta es obligatoria",
             "editTitle": "Editar pregunta",
             "deleteDialogTitle": "Eliminar pregunta",
-            "deleteDialogBodyText": "¿Está seguro de querer eliminar esta pregunta?"
-
+            "deleteDialogBodyText": "¿Está seguro de querer eliminar esta pregunta?",
+            "LanguageOrOrganizationTitle": "Se requiere al menos uno de estos campos: Idioma u Organización."
 
         },
         "pt_BR": {
@@ -44,8 +45,9 @@ class Translations:
             "abbreviationNameError": "A abreviatura é obrigatória",
             "questionDescriptionError": "A descrição da pergunta é obrigatória",
             "editTitle": "Editar pergunta",
-            "deleteDialogTitle": "",
-            "deleteDialogBodyText": ""
+            "deleteDialogTitle": "Excluir pergunta",
+            "deleteDialogBodyText": "Tem certeza de que deseja excluir esta pergunta?",
+            "LanguageOrOrganizationTitle": "Pelo menos um desses campos é obrigatório: Idioma ou Organização."
         }
     }
 

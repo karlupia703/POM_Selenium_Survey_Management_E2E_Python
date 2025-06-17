@@ -1,6 +1,15 @@
+from dotenv import load_dotenv
+import os
+load_dotenv()
 class Config:
     base_url = "https://survey-building-app-develop-iymj66chvq-uc.a.run.app/"
-    language = "Español"  # Options: "Español", "en_US" , pt_BR
+    language = "pt_BR"  # Options: "Español", "en_US" , pt_BR
 
+    Email = os.getenv("user") # Add your username here
+    Password = os.getenv("password") # Add your password here
+
+<<<<<<< HEAD
     Email = "user@gmail.com"
     Password = "password"
+=======
+>>>>>>> fce352e (Change the XPATH to CSS_SELECTOR)

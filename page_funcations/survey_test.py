@@ -1,9 +1,7 @@
 import string
 import time
 import random
-# from lib2to3.pgen2 import driver
 from selenium.webdriver.support import expected_conditions as EC
-from time import sleep
 from selenium.common import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -11,7 +9,8 @@ from page_funcations.driver_manager import DriverManager
 from page_object.survey_page import SurveyPage
 from config.config import Config
 from faker import Faker
-import unittest
+from test_data.translations import Translations
+
 
 class SurveyTest:
     def __init__(self):
@@ -21,10 +20,12 @@ class SurveyTest:
         self.setting_page = SurveyPage(self.driver)
         self.question_page = SurveyPage(self.driver)
 
-    def generate_alphanumeric_string(self, length=4):
+    def generate_alphanumeric_string(self, length=5):
         """Generate a random alphanumeric string (letters + digits)."""
         characters = string.ascii_letters + string.digits
         return ''.join(random.choices(characters, k=length))
+
+
 
     def create_survey(self):
         """Execute the test for creating a survey."""
@@ -150,8 +151,6 @@ class SurveyTest:
         time.sleep(2)
         self.question_page.edit_question_field()
         time.sleep(2)
-        self.question_page.click_on_question_inside_create_btn()
-        time.sleep(3)
         self.question_page.click_on_save_edit_question()
         time.sleep(2)
         print("Question updated successfully.")
@@ -159,7 +158,7 @@ class SurveyTest:
     def remove_question(self):
         self.question_page.click_on_remove_icon()
         time.sleep(2)
-        self.question_page.click_on_save_edit_question()
+        self.question_page.click_on_save_delete_question()
         time.sleep(2)
         print("The question has been removed.")
 
@@ -190,10 +189,17 @@ class SurveyTest:
     def create_settings(self):
         self.setting_page.click_on_setting_page()
         time.sleep(2)
+        expected_texts = Translations.get_translation(Config.language)
+
         self.setting_page.click_on_setting_create_btn()
         time.sleep(2)
         self.setting_page.click_on_programs_dropdown_field()
         time.sleep(3)
+        self.setting_page.click_on_setting_save_btn()
+        time.sleep(2)
+        assert self.setting_page.is_setting_helper_text(expected_texts["LanguageOrOrganizationTitle"]), " Language or Organization title is mismatch"
+        print("Assertion passed: At least one of the fields 'Language' or 'Organization' is required.")
+
         self.setting_page.click_on_language_dropdown()
         time.sleep(3)
         self.setting_page.click_on_organization_dropdown()
@@ -201,6 +207,34 @@ class SurveyTest:
         self.setting_page.click_on_setting_save_btn()
         time.sleep(2)
         print("Setting created successfully")
+
+
+    def create_setting_with_language(self):
+        self.setting_page.click_on_setting_create_btn()
+        time.sleep(2)
+        self.setting_page.click_on_programs_dropdown_field()
+        time.sleep(3)
+        self.setting_page.click_on_setting_save_btn()
+        time.sleep(2)
+        self.setting_page.click_on_language_dropdown()
+        time.sleep(3)
+        self.setting_page.click_on_setting_save_btn()
+        time.sleep(2)
+        print("Setting created with language successfully")
+
+    def create_setting_with_organization(self):
+        self.setting_page.click_on_setting_create_btn()
+        time.sleep(2)
+        self.setting_page.click_on_programs_dropdown_field()
+        time.sleep(3)
+        self.setting_page.click_on_setting_save_btn()
+        time.sleep(2)
+        self.setting_page.click_on_organization_dropdown()
+        time.sleep(2)
+        self.setting_page.click_on_setting_save_btn()
+        time.sleep(2)
+        print("Setting created with organization successfully")
+
 
     def edit_setting(self):
         self.setting_page.click_on_Survey_setting_tab()
@@ -210,7 +244,6 @@ class SurveyTest:
         self.setting_page.edit_change_language()
         time.sleep(5)
         print("Configuration saved successfully")
-
         # Change the status of activity
         self.setting_page.click_on_Survey_setting_tab()
         time.sleep(3)
@@ -221,7 +254,7 @@ class SurveyTest:
     def already_exist_survey(self):
         survey_page = SurveyPage(self.driver)
         # Generate fixed names
-        alphanumeric_suffix = self.generate_alphanumeric_string(4)
+        alphanumeric_suffix = self.generate_alphanumeric_string(3)
         survey_name = f"Survey{alphanumeric_suffix}"
         abbrev_name = f"Abbrev{alphanumeric_suffix}"
         # For redirect into survey home page
@@ -240,6 +273,7 @@ class SurveyTest:
         time.sleep(3)
         survey_page.click_on_survey_tab()
         time.sleep(2)
+
 
         # Attempt duplicate
         survey_page.click_on_create_button()

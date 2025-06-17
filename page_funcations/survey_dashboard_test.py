@@ -1,4 +1,3 @@
-import string
 import time
 from page_funcations.driver_manager import DriverManager
 from page_object.survey_dashboard_page import SurveyDashboardPage
@@ -35,7 +34,7 @@ class SurveyDashboardTest:
         self.survey_dashboard_page.click_on_save_button()
         time.sleep(2)
         self.survey_dashboard_page.click_on_save_survey_dilog_box()
-        time.sleep(2)
+        time.sleep(5)
 
     def test_pagination(self):
         dashboard_page = SurveyDashboardPage(self.driver)
